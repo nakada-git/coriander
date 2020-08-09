@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'file:///C:/Users/daiki/Desktop/coriander/lib/domain/book.dart';
+import 'package:coriander/domain/book.dart';
 import 'package:flutter/material.dart';
 
 class BookListModel extends ChangeNotifier {
@@ -7,8 +7,15 @@ class BookListModel extends ChangeNotifier {
 
   Future fetchBooks() async {
     final docs = await Firestore.instance.collection('books').getDocuments();
-    final books = docs.documents.map((doc) => Book(doc['title'])).toList();
+    final books = docs.documents.map((doc) => Book(doc)).toList();
     this.books = books;
     notifyListeners();
+  }
+
+  Future deleteBook(Book book) async {
+    await Firestore.instance
+        .collection('books')
+        .document(book.documentID)
+        .delete();
   }
 }

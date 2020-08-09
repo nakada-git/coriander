@@ -3,6 +3,9 @@ import 'package:coriander/presentation/add_books/add_book_page.dart';
 import 'package:coriander/presentation/book_list/book_list_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:coriander/domain/book.dart';
+
+import 'book_list_model.dart';
 
 class BookListPage extends StatelessWidget {
   @override
@@ -16,31 +19,111 @@ class BookListPage extends StatelessWidget {
         body: Consumer<BookListModel>(
           builder: (context, model, child) {
             final books = model.books;
-            final listTitles = books
+            final listTiles = books
                 .map(
                   (book) => ListTile(
                     title: Text(book.title),
+                    trailing: IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () async {
+                        // todo: 画面遷移
+
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddBookPage(
+                              book: book,
+                            ),
+                            fullscreenDialog: true,
+                          ),
+                        );
+                        model.fetchBooks();
+                      },
+                    ),
+                    onLongPress: () async {
+                      // todo: 削除
+                      await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('${book.title}を削除しますか？'),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text('OK'),
+                                onPressed: () async {
+                                  Navigator.of(context).pop();
+
+                                  // TODO: 削除のAPIを叩く
+                                  await deleteBook(context, model, book);
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
                   ),
                 )
                 .toList();
             return ListView(
-              children: listTitles,
+              children: listTiles,
             );
           },
         ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddBookPage(),
-                fullscreenDialog: true,
-              ),
-            );
-          },
-        ),
+        floatingActionButton:
+            Consumer<BookListModel>(builder: (context, model, child) {
+          return FloatingActionButton(
+            child: Icon(Icons.add),
+            onPressed: () async {
+              // todo
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddBookPage(),
+                  fullscreenDialog: true,
+                ),
+              );
+              model.fetchBooks();
+            },
+          );
+        }),
       ),
+    );
+  }
+
+  Future deleteBook(
+    BuildContext context,
+    BookListModel model,
+    Book book,
+  ) async {
+    try {
+      await model.deleteBook(book);
+      await model.fetchBooks();
+    } catch (e) {
+      await _showDialog(context, e.toString());
+      print(e.toString());
+    }
+  }
+
+  Future _showDialog(
+    BuildContext context,
+    String title,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

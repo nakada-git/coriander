@@ -8,7 +8,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'file:///C:/Users/daiki/Desktop/coriander/lib/main/main.dart';
 
 void presentation.main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
