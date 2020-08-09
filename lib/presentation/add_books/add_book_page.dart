@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:coriander/domain/book.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +35,18 @@ class AddBookPage extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: <Widget>[
+                  SizedBox(
+                    width: 120,
+                    height: 200,
+                    child: InkWell(
+                      onTap: () async {
+                        await model.showImagePicker();
+                      },
+                      child: model.imageFile != null
+                          ? Image.file(model.imageFile)
+                          : Container(color: Colors.grey),
+                    ),
+                  ),
                   TextField(
                     controller: textEditingController,
                     onChanged: (text) {
